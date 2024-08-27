@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Builder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@material-ui/core@latest/umd/material-ui.production.min.js">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+
+<form id="form-builder">
+    <div id="fields-container">
+        <!-- Fields will be dynamically added here -->
+    </div>
+    <button type="button" id="add-field">Add Field</button>
+    <input type="text" name="form_name" placeholder="Form Name" required>
+    <input type="hidden" name="fields">
+    <button type="submit">Save Form</button>
+</form>
+
+<script>
+let fieldCount = 0;
+
+$('#add-field').on('click', function() {
+    if (fieldCount >= 7) return;
+    fieldCount++;
+
+    $('#fields-container').append(`
+        <div class="field-group" data-order="${fieldCount}">
+            <select name="field_type_${fieldCount}">
+                <option value="star_rating">Star Rating</option>
+                <option value="smile_rating">Smile Rating</option>
+                <option value="text_area">Text Area</option>
+                <option value="radio_buttons">Radio Buttons</option>
+                <option value="categories">Categories</option>
+                <option value="numeric_rating">Numeric Rating</option>
+                <option value="single_line_input">Single Line Input</option>
+            </select>
+            <input type="text" name="label_${fieldCount}" placeholder="Label" required>
+            <input type="checkbox" name="required_${fieldCount}"> Required
+            <input type="text" name="error_message_${fieldCount}" placeholder="Error Message">
+            <button type="button" class="delete-field">Delete</button>
+        </div>
+    `);
+});
+
+$(document).on('click', '.delete-field', function() {
+    $(this).parent().remove();
+    fieldCount--;
+});
+
+$('#form-builder').on('submit', function(e) {
+    e.preventDefault();
+    
+    const fields = [];
+    $('#fields-container .field-group').each(function(index, group) {
+        const order = $(group).data('order');
+        const type = $(group).find(`select[name="field_type_${order}"]`).val();
+        const label = $(group).find(`input[name="label_${order}"]`).val();
+        const required = $(group).find(`input[name="required_${order}"]`).is(':checked');
+        const error_message = $(group).find(`input[name="error_message_${order}"]`).val();
+
+        fields.push({type, label, required, error_message});
+    });
+
+    $('[name="fields"]').val(JSON.stringify(fields));
+    this.submit();
+});
+</script>
+
+</body>
+</html>
